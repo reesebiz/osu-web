@@ -47,7 +47,7 @@ class HomeController extends Controller
 
     public function getNews()
     {
-        return view('home.news');
+        return view('home.home');
     }
 
     public function getChangelog()
