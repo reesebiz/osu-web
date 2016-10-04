@@ -26,6 +26,7 @@ class @UserVerification
     $(document).on 'ajax:error', @showOnError
     $(document).on 'ready turbolinks:load', @showOnLoad
     $(document).on 'keyup', '.js-user-verification--input', @autoSubmit
+    $(document).on 'click', '.js-user-verification--reissue', @reissue
 
     $(window).on 'throttled-resize throttled-scroll', @reposition
 
@@ -61,6 +62,24 @@ class @UserVerification
       .error @error
       .always =>
         Fade.out verifying
+
+
+  reissue: (e) =>
+    e.preventDefault()
+
+    issuing = document.getElementsByClassName('js-user-verification--issuing')[0]
+    target = @inputBox[0]
+
+    @request?.abort()
+    Fade.in issuing
+    Fade.out @errorMessage[0]
+
+    @request =
+      $.post laroute.route('account.reissue-code')
+      .done @success
+      .error @error
+      .always =>
+        Fade.out issuing
 
 
   error: (xhr) =>
@@ -101,18 +120,7 @@ class @UserVerification
     @inputBox[0].value = ''
     @inputBox[0].dataset.lastKey = ''
 
-    if toClick?
-      if toClick.submit
-        # plain javascript here doesn't trigger submit events
-        # which means jquery-ujs handler won't be triggered
-        # reference: https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/submit
-        $(toClick).submit()
-      else if toClick.click
-        # inversely, using jquery here won't actually click the thing
-        # reference: https://github.com/jquery/jquery/blob/f5aa89af7029ae6b9203c2d3e551a8554a0b4b89/src/event.js#L586
-        toClick.click()
-    else
-      osu.reloadPage()
+    osu.executeAction toClick
 
 
   show: (target, html) =>
